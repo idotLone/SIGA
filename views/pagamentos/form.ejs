@@ -1,0 +1,29 @@
+<%- include('../layout/header') %>
+
+<h2>Pagar quota — <%= quota.periodo %></h2>
+
+<div class="card bg-white" style="max-width: 480px;">
+  <div class="card-body">
+    <p><strong>Valor a pagar:</strong> <%= Number(quota.valor).toFixed(2) %> €</p>
+
+    <form method="POST" action="/quotas/<%= quota.id %>/pagar">
+      <div class="mb-3">
+        <label class="form-label">Método de pagamento</label>
+        <select name="metodo" class="form-select" required>
+          <option value="transferencia">Transferência bancária</option>
+          <option value="multibanco">Referência Multibanco</option>
+          <option value="cartao">Cartão</option>
+          <option value="numerario">Numerário</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Referência / comprovativo (opcional)</label>
+        <input type="text" name="referencia" class="form-control" placeholder="Ex: nº de transação">
+      </div>
+      <button type="submit" class="btn btn-primary">Submeter pagamento</button>
+      <a href="/quotas" class="btn btn-link">Cancelar</a>
+    </form>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

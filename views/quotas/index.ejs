@@ -1,0 +1,45 @@
+<%- include('../layout/header') %>
+
+<h2>Minhas quotas</h2>
+
+<% if (typeof msg !== 'undefined' && msg === 'pagamento_submetido') { %>
+  <div class="alert alert-success">Pagamento submetido com sucesso. Aguarda confirmação da Divisão Financeira.</div>
+<% } %>
+
+<table class="table table-bordered bg-white">
+  <thead class="table-dark">
+    <tr>
+      <th>Período</th>
+      <th>Valor</th>
+      <th>Vencimento</th>
+      <th>Estado</th>
+      <th>Ação</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% quotas.forEach(q => { %>
+      <tr>
+        <td><%= q.periodo %></td>
+        <td><%= Number(q.valor).toFixed(2) %> €</td>
+        <td><%= q.dataVencimento %></td>
+        <td>
+          <span class="badge <%= q.estado === 'paga' ? 'bg-success' : (q.estado === 'atrasada' ? 'bg-danger' : 'bg-warning text-dark') %>">
+            <%= q.estado %>
+          </span>
+        </td>
+        <td>
+          <% if (q.estado !== 'paga') { %>
+            <a href="/quotas/<%= q.id %>/pagar" class="btn btn-sm btn-primary">Pagar</a>
+          <% } else { %>
+            —
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+    <% if (quotas.length === 0) { %>
+      <tr><td colspan="5" class="text-center text-muted">Sem quotas registadas.</td></tr>
+    <% } %>
+  </tbody>
+</table>
+
+<%- include('../layout/footer') %>

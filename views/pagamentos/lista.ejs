@@ -1,0 +1,63 @@
+<%- include('../layout/header') %>
+
+<h2><%= titulo %></h2>
+
+<% if (typeof msg !== 'undefined') { %>
+  <% if (msg === 'confirmado') { %>
+    <div class="alert alert-success">Pagamento confirmado e recibo emitido.</div>
+  <% } else if (msg === 'rejeitado') { %>
+    <div class="alert alert-warning">Pagamento rejeitado.</div>
+  <% } %>
+<% } %>
+
+<table class="table table-bordered bg-white">
+  <thead class="table-dark">
+    <tr>
+      <th>#</th>
+      <th>Associado</th>
+      <th>Quota</th>
+      <th>Valor</th>
+      <th>Método</th>
+      <th>Estado</th>
+      <th>Submetido em</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% pagamentos.forEach(p => { %>
+      <tr>
+        <td><%= p.id %></td>
+        <td><%= p.Associado ? p.Associado.nome : '—' %></td>
+        <td><%= p.Quota ? p.Quota.periodo : '—' %></td>
+        <td><%= Number(p.valor).toFixed(2) %> €</td>
+        <td><%= p.metodo %></td>
+        <td>
+          <span class="badge <%= p.estado === 'confirmado' ? 'bg-success' : (p.estado === 'rejeitado' ? 'bg-danger' : 'bg-warning text-dark') %>">
+            <%= p.estado %>
+          </span>
+        </td>
+        <td><%= new Date(p.dataSubmissao).toLocaleString('pt-PT') %></td>
+        <td>
+          <% if (p.estado === 'submetido') { %>
+            <form method="POST" action="/pagamentos/<%= p.id %>/confirmar" class="d-inline">
+              <button class="btn btn-sm btn-success">Confirmar</button>
+            </form>
+            <form method="POST" action="/pagamentos/<%= p.id %>/rejeitar" class="d-inline">
+              <input type="hidden" name="motivo" value="Dados insuficientes">
+              <button class="btn btn-sm btn-danger">Rejeitar</button>
+            </form>
+          <% } else if (p.estado === 'confirmado') { %>
+            <a href="/pagamentos/<%= p.id %>/recibo" class="btn btn-sm btn-outline-primary">Ver recibo</a>
+          <% } else { %>
+            —
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+    <% if (pagamentos.length === 0) { %>
+      <tr><td colspan="8" class="text-center text-muted">Sem registos.</td></tr>
+    <% } %>
+  </tbody>
+</table>
+
+<%- include('../layout/footer') %>

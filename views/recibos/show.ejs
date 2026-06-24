@@ -1,0 +1,17 @@
+<%- include('../layout/header') %>
+
+<h2>Recibo <%= recibo.numero %></h2>
+
+<div class="card bg-white" style="max-width: 480px;">
+  <div class="card-body">
+    <p><strong>Associado:</strong> <%= recibo.Pagamento.Associado.nome %></p>
+    <p><strong>Quota:</strong> <%= recibo.Pagamento.Quota.periodo %></p>
+    <p><strong>Valor pago:</strong> <%= Number(recibo.Pagamento.valor).toFixed(2) %> €</p>
+    <p><strong>Método:</strong> <%= recibo.Pagamento.metodo %></p>
+    <p><strong>Data de emissão:</strong> <%= new Date(recibo.dataEmissao).toLocaleString('pt-PT') %></p>
+  </div>
+</div>
+
+<p class="mt-3"><a href="/quotas" class="btn btn-link">&larr; Voltar</a></p>
+
+<%- include('../layout/footer') %>
