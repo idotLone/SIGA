@@ -1,0 +1,297 @@
+<%# views/financeiro/pagamentos/detalhe.ejs %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="/financeiro">Financeiro</a></li>
+        <li class="breadcrumb-item"><a href="/financeiro/pagamentos">Pagamentos</a></li>
+        <li class="breadcrumb-item active"><%= pagamento.codigo %></li>
+      </ol>
+    </nav>
+    <h2 class="siga-page-title mb-0">
+      <i class="bi bi-credit-card-2-front text-primary me-2"></i><%= pagamento.codigo %>
+    </h2>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="/financeiro/pagamentos" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Voltar
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <!-- Coluna principal -->
+  <div class="col-lg-8">
+
+    <!-- Dados do Pagamento -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i>Dados do Pagamento</h5>
+        <span class="badge bg-<%= pagamento.statusBadge %> fs-6"><%= pagamento.statusLabel %></span>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <label class="form-label small text-muted fw-semibold text-uppercase">Código</label>
+            <p class="mb-0 fw-bold"><code><%= pagamento.codigo %></code></p>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label small text-muted fw-semibold text-uppercase">Tipo de Pagamento</label>
+            <p class="mb-0"><span class="badge bg-secondary fs-6"><%= pagamento.tipoLabel %></span></p>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label small text-muted fw-semibold text-uppercase">Valor</label>
+            <p class="mb-0 fs-4 fw-bold text-success"><%= parseFloat(pagamento.valor).toFixed(2) %> CVE</p>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label small text-muted fw-semibold text-uppercase">Data do Pagamento</label>
+            <p class="mb-0"><%= new Date(pagamento.data_pagamento).toLocaleDateString('pt-PT') %></p>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label small text-muted fw-semibold text-uppercase">Método de Pagamento</label>
+            <% const metodos = { transferencia: 'Transferência Bancária', numerario: 'Numerário', cheque: 'Cheque', mbway: 'MBWay', outro: 'Outro' }; %>
+            <p class="mb-0"><%= metodos[pagamento.metodo_pagamento] || pagamento.metodo_pagamento %></p>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label small text-muted fw-semibold text-uppercase">Referência</label>
+            <p class="mb-0"><%= pagamento.referencia_pagamento || '—' %></p>
+          </div>
+          <% if (pagamento.periodo_referencia) { %>
+          <div class="col-sm-6">
+            <label class="form-label small text-muted fw-semibold text-uppercase">Período de Referência</label>
+            <p class="mb-0"><%= pagamento.periodo_referencia %></p>
+          </div>
+          <% } %>
+          <% if (pagamento.atividade) { %>
+          <div class="col-12">
+            <label class="form-label small text-muted fw-semibold text-uppercase">Atividade</label>
+            <p class="mb-0"><strong><%= pagamento.atividade.titulo %></strong> — <%= pagamento.atividade.data_inicio %></p>
+          </div>
+          <% } %>
+          <% if (pagamento.observacoes) { %>
+          <div class="col-12">
+            <label class="form-label small text-muted fw-semibold text-uppercase">Observações</label>
+            <p class="mb-0 text-muted"><%= pagamento.observacoes %></p>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dados do Associado -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0"><i class="bi bi-person me-2"></i>Dados do Associado</h5>
+      </div>
+      <div class="card-body">
+        <% if (pagamento.associado) {
+          const ass = pagamento.associado;
+          const nomeCompleto = ass.tipo === 'pessoa_fisica' ? `${ass.nome} ${ass.apelido || ''}`.trim() : ass.nome_entidade;
+        %>
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <label class="form-label small text-muted fw-semibold text-uppercase">Nome</label>
+            <p class="mb-0 fw-semibold"><%= nomeCompleto %></p>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label small text-muted fw-semibold text-uppercase">Tipo</label>
+            <p class="mb-0">
+              <span class="badge bg-<%= ass.tipo === 'pessoa_fisica' ? 'info' : 'primary' %>">
+                <%= ass.tipo === 'pessoa_fisica' ? 'Pessoa Física' : 'Pessoa Jurídica' %>
+              </span>
+            </p>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label small text-muted fw-semibold text-uppercase">Código</label>
+            <p class="mb-0"><code><%= ass.codigo %></code></p>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label small text-muted fw-semibold text-uppercase">Email</label>
+            <p class="mb-0"><a href="mailto:<%= ass.email %>"><%= ass.email %></a></p>
+          </div>
+          <% if (ass.nif) { %>
+          <div class="col-sm-6">
+            <label class="form-label small text-muted fw-semibold text-uppercase">NIF</label>
+            <p class="mb-0"><%= ass.nif %></p>
+          </div>
+          <% } %>
+          <% if (ass.morada) { %>
+          <div class="col-12">
+            <label class="form-label small text-muted fw-semibold text-uppercase">Morada</label>
+            <p class="mb-0 text-muted"><%= ass.morada %></p>
+          </div>
+          <% } %>
+        </div>
+        <% } else { %>
+        <p class="text-muted mb-0">Associado não encontrado.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Recibo Emitido -->
+    <% if (pagamento.recibo) { %>
+    <div class="card border-0 shadow-sm border-start border-4 border-success">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <h6 class="mb-1"><i class="bi bi-receipt-cutoff text-success me-2"></i>Recibo Emitido</h6>
+          <p class="mb-0 text-muted small">
+            Nº <strong><%= pagamento.recibo.numero %></strong> —
+            emitido em <%= new Date(pagamento.recibo.data_emissao).toLocaleDateString('pt-PT') %>
+            por <%= pagamento.recibo.emissor ? pagamento.recibo.emissor.nome : '—' %>
+          </p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/financeiro/recibos/<%= pagamento.recibo.id %>" class="btn btn-success btn-sm">
+            <i class="bi bi-eye me-1"></i>Ver Recibo
+          </a>
+          <a href="/financeiro/recibos/<%= pagamento.recibo.id %>/imprimir" target="_blank" class="btn btn-outline-success btn-sm">
+            <i class="bi bi-printer me-1"></i>Imprimir
+          </a>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Motivo de rejeição -->
+    <% if (pagamento.status === 'rejeitado' && pagamento.motivo_rejeicao) { %>
+    <div class="card border-0 shadow-sm border-start border-4 border-danger mt-4">
+      <div class="card-body">
+        <h6 class="text-danger mb-1"><i class="bi bi-x-circle me-2"></i>Motivo de Rejeição</h6>
+        <p class="mb-0"><%= pagamento.motivo_rejeicao %></p>
+        <small class="text-muted">
+          Por: <%= pagamento.gestor ? pagamento.gestor.nome : '—' %> —
+          em: <%= pagamento.data_confirmacao ? new Date(pagamento.data_confirmacao).toLocaleString('pt-PT') : '—' %>
+        </small>
+      </div>
+    </div>
+    <% } %>
+
+  </div>
+
+  <!-- Coluna lateral: Ações -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm sticky-top" style="top: 1rem;">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Ações</h5>
+      </div>
+      <div class="card-body">
+
+        <% if (['pendente', 'em_analise'].includes(pagamento.status)) { %>
+
+          <!-- Colocar em análise -->
+          <% if (pagamento.status === 'pendente') { %>
+          <form method="POST" action="/financeiro/pagamentos/<%= pagamento.id %>/em-analise" class="mb-2">
+            <button type="submit" class="btn btn-info w-100">
+              <i class="bi bi-search me-2"></i>Colocar em Análise
+            </button>
+          </form>
+          <% } %>
+
+          <!-- Confirmar Pagamento -->
+          <button type="button" class="btn btn-success w-100 mb-2" data-bs-toggle="modal" data-bs-target="#modalConfirmar">
+            <i class="bi bi-check-circle me-2"></i>Confirmar Pagamento
+          </button>
+
+          <!-- Rejeitar Pagamento -->
+          <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#modalRejeitar">
+            <i class="bi bi-x-circle me-2"></i>Rejeitar Pagamento
+          </button>
+
+        <% } else if (pagamento.status === 'confirmado') { %>
+          <div class="alert alert-success mb-0">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Pagamento Confirmado</strong><br />
+            <small>
+              por <%= pagamento.gestor ? pagamento.gestor.nome : '—' %><br />
+              em <%= pagamento.data_confirmacao ? new Date(pagamento.data_confirmacao).toLocaleString('pt-PT') : '—' %>
+            </small>
+          </div>
+        <% } else if (pagamento.status === 'rejeitado') { %>
+          <div class="alert alert-danger mb-0">
+            <i class="bi bi-x-circle-fill me-2"></i>
+            <strong>Pagamento Rejeitado</strong>
+          </div>
+        <% } %>
+
+      </div>
+
+      <!-- Histórico de datas -->
+      <div class="card-footer bg-white border-top">
+        <small class="text-muted">
+          <i class="bi bi-calendar me-1"></i>Submetido: <%= new Date(pagamento.created_at).toLocaleString('pt-PT') %><br />
+          <% if (pagamento.updated_at) { %>
+          <i class="bi bi-arrow-clockwise me-1"></i>Atualizado: <%= new Date(pagamento.updated_at).toLocaleString('pt-PT') %>
+          <% } %>
+        </small>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: Confirmar Pagamento -->
+<div class="modal fade" id="modalConfirmar" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title"><i class="bi bi-check-circle text-success me-2"></i>Confirmar Pagamento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/financeiro/pagamentos/<%= pagamento.id %>/confirmar">
+        <div class="modal-body">
+          <p>Tem a certeza que pretende confirmar o pagamento <strong><%= pagamento.codigo %></strong>?</p>
+          <p class="text-muted small">Ao confirmar, será emitido automaticamente um recibo digital e o associado será notificado.</p>
+          <div class="mb-3">
+            <label class="form-label">Observações (opcional)</label>
+            <textarea name="observacoes" class="form-control" rows="3"
+                      placeholder="Notas adicionais sobre a confirmação..."></textarea>
+          </div>
+          <div class="alert alert-info small mb-0">
+            <i class="bi bi-info-circle me-1"></i>
+            Valor a confirmar: <strong><%= parseFloat(pagamento.valor).toFixed(2) %> CVE</strong>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-check-circle me-1"></i>Confirmar e Emitir Recibo
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Rejeitar Pagamento -->
+<div class="modal fade" id="modalRejeitar" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title"><i class="bi bi-x-circle text-danger me-2"></i>Rejeitar Pagamento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/financeiro/pagamentos/<%= pagamento.id %>/rejeitar">
+        <div class="modal-body">
+          <p>Indique o motivo da rejeição do pagamento <strong><%= pagamento.codigo %></strong>:</p>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Motivo de Rejeição <span class="text-danger">*</span></label>
+            <textarea name="motivo_rejeicao" class="form-control" rows="4"
+                      placeholder="Descreva o motivo da rejeição..." required></textarea>
+          </div>
+          <div class="alert alert-warning small mb-0">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            Esta ação é registada no log de auditoria e o associado será notificado.
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-x-circle me-1"></i>Rejeitar Pagamento
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

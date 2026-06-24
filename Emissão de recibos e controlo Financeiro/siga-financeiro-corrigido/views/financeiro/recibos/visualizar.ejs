@@ -1,0 +1,215 @@
+<%# views/financeiro/recibos/visualizar.ejs %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="/financeiro">Financeiro</a></li>
+        <li class="breadcrumb-item"><a href="/financeiro/recibos">Recibos</a></li>
+        <li class="breadcrumb-item active"><%= recibo.numero %></li>
+      </ol>
+    </nav>
+    <h2 class="siga-page-title mb-0">
+      <i class="bi bi-receipt-cutoff text-success me-2"></i><%= recibo.numero %>
+    </h2>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="/financeiro/recibos" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Voltar
+    </a>
+    <% if (recibo.estado === 'ativo') { %>
+    <a href="/financeiro/recibos/<%= recibo.id %>/imprimir" target="_blank" class="btn btn-primary btn-sm">
+      <i class="bi bi-printer me-1"></i>Imprimir / PDF
+    </a>
+    <% } %>
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <!-- Preview do Recibo -->
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4 p-md-5">
+
+        <!-- Estado de anulação -->
+        <% if (recibo.estado === 'anulado') { %>
+        <div class="alert alert-danger d-flex align-items-center mb-4">
+          <i class="bi bi-x-octagon-fill me-2 fs-5"></i>
+          <div>
+            <strong>Recibo ANULADO</strong><br />
+            <small>Motivo: <%= recibo.motivo_anulacao %> —
+              em <%= new Date(recibo.data_anulacao).toLocaleDateString('pt-PT') %></small>
+          </div>
+        </div>
+        <% } %>
+
+        <!-- Cabeçalho do recibo -->
+        <div class="d-flex justify-content-between align-items-start mb-5">
+          <div>
+            <h3 class="fw-bold text-primary mb-0">SIGA</h3>
+            <p class="text-muted small mb-0">Sistema de Gestão de Associados</p>
+            <p class="text-muted small mb-0">Organização Não Governamental</p>
+          </div>
+          <div class="text-end">
+            <h4 class="fw-bold mb-0">RECIBO</h4>
+            <p class="text-muted small mb-0">Nº <strong><%= recibo.numero %></strong></p>
+            <p class="text-muted small mb-0">Data: <%= new Date(recibo.data_emissao).toLocaleDateString('pt-PT') %></p>
+          </div>
+        </div>
+
+        <hr />
+
+        <!-- Dados do Emitente -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h6 class="text-muted text-uppercase small fw-semibold mb-2">Emitido a:</h6>
+            <% if (recibo.pagamento && recibo.pagamento.associado) {
+               const ass = recibo.pagamento.associado;
+               const nome = ass.tipo === 'pessoa_fisica' ? `${ass.nome} ${ass.apelido || ''}`.trim() : ass.nome_entidade;
+            %>
+            <p class="fw-bold mb-1"><%= nome %></p>
+            <% if (ass.nif) { %><p class="text-muted small mb-1">NIF: <%= ass.nif %></p><% } %>
+            <p class="text-muted small mb-1"><%= ass.email %></p>
+            <% if (ass.telefone) { %><p class="text-muted small mb-1"><%= ass.telefone %></p><% } %>
+            <% if (ass.morada) { %><p class="text-muted small mb-0"><%= ass.morada %></p><% } %>
+            <% } %>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <h6 class="text-muted text-uppercase small fw-semibold mb-2">Referência do Pagamento:</h6>
+            <% if (recibo.pagamento) { %>
+            <p class="text-muted small mb-1">Código: <strong><%= recibo.pagamento.codigo %></strong></p>
+            <p class="text-muted small mb-1">Data pgto: <%= new Date(recibo.pagamento.data_pagamento).toLocaleDateString('pt-PT') %></p>
+            <% const metodos = { transferencia: 'Transferência Bancária', numerario: 'Numerário', cheque: 'Cheque', mbway: 'MBWay', outro: 'Outro' }; %>
+            <p class="text-muted small mb-1">Método: <%= metodos[recibo.pagamento.metodo_pagamento] %></p>
+            <% if (recibo.pagamento.referencia_pagamento) { %>
+            <p class="text-muted small mb-0">Ref: <%= recibo.pagamento.referencia_pagamento %></p>
+            <% } %>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Descrição / Itens -->
+        <div class="table-responsive mb-4">
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Descrição</th>
+                <th class="text-end" style="width: 150px">Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><%= recibo.descricao %></td>
+                <td class="text-end fw-bold"><%= parseFloat(recibo.valor_total).toFixed(2) %> CVE</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="table-light">
+                <td class="text-end fw-bold">Total</td>
+                <td class="text-end fw-bold text-success fs-5"><%= parseFloat(recibo.valor_total).toFixed(2) %> CVE</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Rodapé do recibo -->
+        <div class="d-flex justify-content-between align-items-end mt-5">
+          <div class="text-muted small">
+            <p class="mb-0">Emitido por: <strong><%= recibo.emissor ? recibo.emissor.nome : '—' %></strong></p>
+            <p class="mb-0">Divisão de Gestão Financeira</p>
+            <p class="mb-0">Sistema SIGA — Documento Digital</p>
+          </div>
+          <div class="text-center">
+            <div style="border-top: 1px solid #ccc; padding-top: 8px; min-width: 200px;">
+              <small class="text-muted">Assinatura / Carimbo</small>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Coluna lateral: Info e ações -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Estado do Recibo</h5>
+      </div>
+      <div class="card-body">
+        <span class="badge bg-<%= recibo.estado === 'ativo' ? 'success' : 'secondary' %> fs-6">
+          <%= recibo.estado === 'ativo' ? 'Ativo' : 'Anulado' %>
+        </span>
+
+        <% if (recibo.estado === 'ativo' && usuario && ['administrador', 'gestor_financeiro'].includes(usuario.perfil)) { %>
+        <hr />
+        <h6 class="text-danger">Anular Recibo</h6>
+        <p class="small text-muted">A anulação de um recibo é um processo irreversível e fica registada no log de auditoria.</p>
+        <button type="button" class="btn btn-outline-danger btn-sm w-100" data-bs-toggle="modal" data-bs-target="#modalAnular">
+          <i class="bi bi-x-octagon me-1"></i>Anular Recibo
+        </button>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Informações</h5>
+      </div>
+      <div class="card-body">
+        <dl class="row mb-0 small">
+          <dt class="col-6 text-muted">Emitido em</dt>
+          <dd class="col-6"><%= new Date(recibo.data_emissao).toLocaleDateString('pt-PT') %></dd>
+
+          <dt class="col-6 text-muted">Emitido por</dt>
+          <dd class="col-6"><%= recibo.emissor ? recibo.emissor.nome : '—' %></dd>
+
+          <dt class="col-6 text-muted">Valor</dt>
+          <dd class="col-6 fw-bold"><%= parseFloat(recibo.valor_total).toFixed(2) %> CVE</dd>
+
+          <% if (recibo.pagamento) { %>
+          <dt class="col-6 text-muted">Pagamento</dt>
+          <dd class="col-6">
+            <a href="/financeiro/pagamentos/<%= recibo.pagamento.id %>">
+              <%= recibo.pagamento.codigo %>
+            </a>
+          </dd>
+          <% } %>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: Anular Recibo -->
+<div class="modal fade" id="modalAnular" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title text-danger"><i class="bi bi-x-octagon me-2"></i>Anular Recibo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/financeiro/recibos/<%= recibo.id %>/anular">
+        <div class="modal-body">
+          <div class="alert alert-danger small">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            Esta ação é <strong>irreversível</strong>. O recibo ficará marcado como anulado.
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Motivo de Anulação <span class="text-danger">*</span></label>
+            <textarea name="motivo_anulacao" class="form-control" rows="3"
+                      placeholder="Descreva o motivo da anulação..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-x-octagon me-1"></i>Confirmar Anulação
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

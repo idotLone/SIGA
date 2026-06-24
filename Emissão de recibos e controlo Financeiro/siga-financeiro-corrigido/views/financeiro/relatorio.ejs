@@ -1,0 +1,215 @@
+<%# views/financeiro/relatorio.ejs %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="siga-page-title mb-1">
+      <i class="bi bi-bar-chart-line text-primary me-2"></i>Relatório Financeiro
+    </h2>
+    <p class="text-muted mb-0">Período: <strong><%= tituloPeriodo %></strong></p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="/financeiro" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Voltar
+    </a>
+    <button onclick="window.print()" class="btn btn-primary btn-sm">
+      <i class="bi bi-printer me-1"></i>Exportar PDF
+    </button>
+  </div>
+</div>
+
+<!-- Seletor de período -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <form method="GET" action="/financeiro/relatorio" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Período</label>
+        <select name="periodo" id="selectPeriodo" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="mensal" <%= periodo === 'mensal' ? 'selected' : '' %>>Mensal</option>
+          <option value="trimestral" <%= periodo === 'trimestral' ? 'selected' : '' %>>Trimestral</option>
+          <option value="anual" <%= periodo === 'anual' ? 'selected' : '' %>>Anual</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Ano</label>
+        <select name="ano" class="form-select form-select-sm">
+          <% for (let y = new Date().getFullYear(); y >= 2020; y--) { %>
+            <option value="<%= y %>" <%= y === ano ? 'selected' : '' %>><%= y %></option>
+          <% } %>
+        </select>
+      </div>
+      <% if (periodo === 'mensal') { %>
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Mês</label>
+        <select name="mes" class="form-select form-select-sm">
+          <% const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']; %>
+          <% meses.forEach((m, i) => { %>
+            <option value="<%= i+1 %>" <%= mes === i+1 ? 'selected' : '' %>><%= m %></option>
+          <% }) %>
+        </select>
+      </div>
+      <% } %>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="bi bi-filter me-1"></i>Filtrar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- KPIs Resumo -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm text-center h-100">
+      <div class="card-body py-4">
+        <div class="fs-2 fw-bold text-success"><%= totalConfirmado %></div>
+        <div class="text-muted small">CVE Recebido</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm text-center h-100">
+      <div class="card-body py-4">
+        <div class="fs-2 fw-bold text-warning"><%= totalPendente %></div>
+        <div class="text-muted small">CVE Pendente</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm text-center h-100">
+      <div class="card-body py-4">
+        <div class="fs-2 fw-bold text-primary"><%= pagamentos.length %></div>
+        <div class="text-muted small">Pagamentos Confirmados</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm text-center h-100">
+      <div class="card-body py-4">
+        <div class="fs-2 fw-bold text-secondary"><%= totalRecibos %></div>
+        <div class="text-muted small">Recibos Emitidos</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Por Tipo e Por Método -->
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white py-3">
+        <h6 class="mb-0">Por Tipo de Pagamento</h6>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+          <thead class="table-light">
+            <tr><th>Tipo</th><th class="text-center">Qtd.</th><th class="text-end">Total (CVE)</th></tr>
+          </thead>
+          <tbody>
+            <% const tipoLabels = { quota: 'Quota', atividade: 'Atividade', inscricao: 'Inscrição' }; %>
+            <% if (porTipo.length === 0) { %>
+            <tr><td colspan="3" class="text-center text-muted py-3">Sem dados</td></tr>
+            <% } %>
+            <% porTipo.forEach(t => { %>
+            <tr>
+              <td><span class="badge bg-secondary"><%= tipoLabels[t.tipo] || t.tipo %></span></td>
+              <td class="text-center"><%= t.quantidade %></td>
+              <td class="text-end fw-bold"><%= parseFloat(t.total || 0).toFixed(2) %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white py-3">
+        <h6 class="mb-0">Por Método de Pagamento</h6>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+          <thead class="table-light">
+            <tr><th>Método</th><th class="text-center">Qtd.</th><th class="text-end">Total (CVE)</th></tr>
+          </thead>
+          <tbody>
+            <% const metodoLabels = { transferencia: 'Transferência', numerario: 'Numerário', cheque: 'Cheque', mbway: 'MBWay', outro: 'Outro' }; %>
+            <% if (porMetodo.length === 0) { %>
+            <tr><td colspan="3" class="text-center text-muted py-3">Sem dados</td></tr>
+            <% } %>
+            <% porMetodo.forEach(m => { %>
+            <tr>
+              <td><%= metodoLabels[m.metodo_pagamento] || m.metodo_pagamento %></td>
+              <td class="text-center"><%= m.quantidade %></td>
+              <td class="text-end fw-bold"><%= parseFloat(m.total || 0).toFixed(2) %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lista detalhada de pagamentos -->
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white py-3">
+    <h6 class="mb-0">
+      <i class="bi bi-list-ul me-2"></i>Pagamentos Confirmados — <%= tituloPeriodo %>
+    </h6>
+  </div>
+  <div class="card-body p-0">
+    <% if (pagamentos.length === 0) { %>
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-inbox fs-1"></i>
+      <p class="mt-2">Nenhum pagamento confirmado no período selecionado.</p>
+    </div>
+    <% } else { %>
+    <div class="table-responsive">
+      <table class="table table-sm siga-table mb-0">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Associado</th>
+            <th>Tipo</th>
+            <th>Data</th>
+            <th class="text-end">Valor (CVE)</th>
+            <th>Recibo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% let totalGeral = 0; %>
+          <% pagamentos.forEach(pag => {
+             totalGeral += parseFloat(pag.valor);
+             const ass = pag.associado;
+             const nome = ass ? (ass.tipo === 'pessoa_fisica' ? `${ass.nome} ${ass.apelido || ''}`.trim() : ass.nome_entidade) : '—';
+          %>
+          <tr>
+            <td><code class="text-dark small"><%= pag.codigo %></code></td>
+            <td>
+              <span class="small"><%= nome %></span><br />
+              <small class="text-muted"><%= ass ? ass.codigo : '' %></small>
+            </td>
+            <td><% const tl = { quota: 'Quota', atividade: 'Atividade', inscricao: 'Inscrição' }; %><span class="badge bg-secondary small"><%= tl[pag.tipo] %></span></td>
+            <td><small><%= new Date(pag.data_pagamento).toLocaleDateString('pt-PT') %></small></td>
+            <td class="text-end fw-bold"><%= parseFloat(pag.valor).toFixed(2) %></td>
+            <td>
+              <% if (pag.recibo) { %>
+                <a href="/financeiro/recibos/<%= pag.recibo.id %>" class="small text-success"><%= pag.recibo.numero %></a>
+              <% } else { %>—<% } %>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+        <tfoot class="table-light">
+          <tr>
+            <td colspan="4" class="text-end fw-bold">TOTAL</td>
+            <td class="text-end fw-bold text-success"><%= totalGeral.toFixed(2) %> CVE</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <% } %>
+  </div>
+</div>

@@ -1,0 +1,185 @@
+/* ============================================
+   SIGA — Sistema de Gestão de Associados
+   CSS Personalizado — Módulo Financeiro
+   ============================================ */
+
+:root {
+  --siga-primary: #1a56c8;
+  --siga-primary-dark: #1e429f;
+  --siga-sidebar-bg: #1e3a5f;
+  --siga-surface: #f8fafc;
+  --siga-border: #e2e8f0;
+  --siga-text-muted: #64748b;
+}
+
+/* Navbar */
+.siga-navbar {
+  background: linear-gradient(135deg, #1e3a5f 0%, #1a56db 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.siga-navbar .navbar-brand {
+  font-size: 1.4rem;
+  letter-spacing: 0.5px;
+}
+
+/* Títulos de página */
+.siga-page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Cards KPI */
+.siga-kpi-card {
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+}
+
+.siga-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.siga-kpi-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+}
+
+.siga-kpi-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--siga-text-muted);
+  margin-top: 2px;
+}
+
+.siga-kpi-icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Tabelas */
+.siga-table thead th {
+  background-color: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--siga-text-muted);
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+}
+
+.siga-table tbody td {
+  vertical-align: middle;
+  padding: 0.75rem 1rem;
+}
+
+.siga-table tbody tr:hover {
+  background-color: #f0f7ff;
+}
+
+/* Cards */
+.card {
+  border-radius: 0.75rem;
+}
+
+.card-header {
+  border-radius: 0.75rem 0.75rem 0 0 !important;
+  font-weight: 600;
+}
+
+/* Badges de estado */
+.badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+}
+
+/* Formulários */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--siga-primary);
+  box-shadow: 0 0 0 0.2rem rgba(26, 86, 219, 0.15);
+}
+
+/* Botões */
+.btn-primary {
+  background-color: var(--siga-primary);
+  border-color: var(--siga-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--siga-primary-dark);
+  border-color: var(--siga-primary-dark);
+}
+
+/* Alertas */
+.alert {
+  border-radius: 0.75rem;
+  border-left: 4px solid;
+}
+
+.alert-warning {
+  border-left-color: #f59e0b;
+}
+
+.alert-success {
+  border-left-color: #10b981;
+}
+
+.alert-danger {
+  border-left-color: #ef4444;
+}
+
+.alert-info {
+  border-left-color: #3b82f6;
+}
+
+/* Paginação */
+.page-link {
+  color: var(--siga-primary);
+  border-radius: 0.375rem !important;
+  margin: 0 2px;
+}
+
+.page-item.active .page-link {
+  background-color: var(--siga-primary);
+  border-color: var(--siga-primary);
+}
+
+/* Breadcrumb */
+.breadcrumb-item a {
+  color: var(--siga-primary);
+  text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+  text-decoration: underline;
+}
+
+/* Layout responsivo */
+@media (max-width: 768px) {
+  .siga-page-title {
+    font-size: 1.2rem;
+  }
+  .siga-kpi-value {
+    font-size: 1.5rem;
+  }
+}
+
+/* Print */
+@media print {
+  .siga-navbar, .no-print, .alert, nav[aria-label] {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+}

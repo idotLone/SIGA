@@ -1,0 +1,176 @@
+<%# views/financeiro/dashboard.ejs %>
+
+<!-- Cabeçalho da página -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="siga-page-title mb-1">
+      <i class="bi bi-cash-coin text-primary me-2"></i>Controlo Financeiro
+    </h2>
+    <p class="text-muted mb-0">Divisão de Gestão Financeira — visão geral em tempo real</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="/financeiro/relatorio" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-bar-chart-line me-1"></i>Relatório
+    </a>
+    <a href="/financeiro/pagamentos" class="btn btn-primary btn-sm">
+      <i class="bi bi-credit-card me-1"></i>Ver Pagamentos
+    </a>
+  </div>
+</div>
+
+<!-- KPIs Principais (RF11) -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="card siga-kpi-card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="siga-kpi-icon bg-warning-subtle rounded-3 p-3 me-3">
+            <i class="bi bi-hourglass-split fs-4 text-warning"></i>
+          </div>
+          <div>
+            <div class="siga-kpi-value"><%= totalPendentes %></div>
+            <div class="siga-kpi-label">Pagamentos Pendentes</div>
+          </div>
+        </div>
+        <a href="/financeiro/pagamentos?status=pendente" class="stretched-link"></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="card siga-kpi-card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="siga-kpi-icon bg-info-subtle rounded-3 p-3 me-3">
+            <i class="bi bi-search fs-4 text-info"></i>
+          </div>
+          <div>
+            <div class="siga-kpi-value"><%= totalEmAnalise %></div>
+            <div class="siga-kpi-label">Em Análise</div>
+          </div>
+        </div>
+        <a href="/financeiro/pagamentos?status=em_analise" class="stretched-link"></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="card siga-kpi-card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="siga-kpi-icon bg-success-subtle rounded-3 p-3 me-3">
+            <i class="bi bi-check-circle fs-4 text-success"></i>
+          </div>
+          <div>
+            <div class="siga-kpi-value"><%= totalConfirmados %></div>
+            <div class="siga-kpi-label">Confirmados</div>
+          </div>
+        </div>
+        <a href="/financeiro/pagamentos?status=confirmado" class="stretched-link"></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="card siga-kpi-card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="siga-kpi-icon bg-primary-subtle rounded-3 p-3 me-3">
+            <i class="bi bi-receipt fs-4 text-primary"></i>
+          </div>
+          <div>
+            <div class="siga-kpi-value"><%= recibosEmitidos %></div>
+            <div class="siga-kpi-label">Recibos este Mês</div>
+          </div>
+        </div>
+        <a href="/financeiro/recibos" class="stretched-link"></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Volume Financeiro -->
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100 border-start border-4 border-success">
+      <div class="card-body">
+        <h6 class="text-muted text-uppercase small mb-1">Volume Recebido — Mês Atual</h6>
+        <div class="display-6 fw-bold text-success"><%= volumeMes %> <span class="fs-5 text-muted">CVE</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100 border-start border-4 border-primary">
+      <div class="card-body">
+        <h6 class="text-muted text-uppercase small mb-1">Volume Acumulado — Ano Atual</h6>
+        <div class="display-6 fw-bold text-primary"><%= volumeAno %> <span class="fs-5 text-muted">CVE</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Alerta de quotas em atraso (RF14) -->
+<% if (quotasAtrasadas > 0) { %>
+<div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+  <i class="bi bi-exclamation-triangle-fill fs-5 me-3"></i>
+  <div>
+    <strong>Alerta:</strong> Existem <strong><%= quotasAtrasadas %></strong> quota(s) pendentes há mais de 30 dias.
+    <a href="/financeiro/pagamentos?status=pendente&tipo=quota" class="alert-link ms-1">Ver quotas em atraso →</a>
+  </div>
+</div>
+<% } %>
+
+<!-- Pagamentos pendentes recentes -->
+<div class="row g-3">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <h5 class="mb-0"><i class="bi bi-clock-history me-2 text-warning"></i>Pagamentos Pendentes de Confirmação</h5>
+        <a href="/financeiro/pagamentos?status=pendente" class="btn btn-sm btn-outline-secondary">Ver todos</a>
+      </div>
+      <div class="card-body p-0">
+        <% if (pagamentosPendentes.length === 0) { %>
+          <div class="text-center py-5 text-muted">
+            <i class="bi bi-check2-all fs-1 text-success"></i>
+            <p class="mt-2">Não há pagamentos pendentes de confirmação.</p>
+          </div>
+        <% } else { %>
+          <div class="table-responsive">
+            <table class="table table-hover siga-table mb-0">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Associado</th>
+                  <th>Tipo</th>
+                  <th>Valor</th>
+                  <th>Data Pagamento</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% pagamentosPendentes.forEach(pag => { %>
+                <tr>
+                  <td><span class="badge bg-light text-dark border"><%= pag.codigo %></span></td>
+                  <td>
+                    <strong><%= pag.associado ? (pag.associado.tipo === 'pessoa_fisica' ? `${pag.associado.nome} ${pag.associado.apelido || ''}` : pag.associado.nome_entidade) : 'N/D' %></strong>
+                  </td>
+                  <td>
+                    <span class="badge bg-secondary"><%= pag.tipoLabel %></span>
+                  </td>
+                  <td class="fw-bold"><%= parseFloat(pag.valor).toFixed(2) %> CVE</td>
+                  <td><%= new Date(pag.data_pagamento).toLocaleDateString('pt-PT') %></td>
+                  <td>
+                    <a href="/financeiro/pagamentos/<%= pag.id %>" class="btn btn-sm btn-primary">
+                      <i class="bi bi-eye me-1"></i>Analisar
+                    </a>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
