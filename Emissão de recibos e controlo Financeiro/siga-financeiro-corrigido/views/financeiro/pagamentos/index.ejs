@@ -1,0 +1,160 @@
+<%# views/financeiro/pagamentos/index.ejs %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="siga-page-title mb-1">
+      <i class="bi bi-credit-card text-primary me-2"></i>Pagamentos
+    </h2>
+    <p class="text-muted mb-0">Total de <strong><%= count %></strong> pagamento(s) encontrado(s)</p>
+  </div>
+  <a href="/financeiro" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Voltar
+  </a>
+</div>
+
+<!-- Filtros -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <form method="GET" action="/financeiro/pagamentos" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Associado</label>
+        <input type="text" name="associado" class="form-control form-control-sm"
+               placeholder="Nome ou código..." value="<%= filtros.associado || '' %>" />
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Estado</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          <option value="pendente" <%= filtros.status === 'pendente' ? 'selected' : '' %>>Pendente</option>
+          <option value="em_analise" <%= filtros.status === 'em_analise' ? 'selected' : '' %>>Em Análise</option>
+          <option value="confirmado" <%= filtros.status === 'confirmado' ? 'selected' : '' %>>Confirmado</option>
+          <option value="rejeitado" <%= filtros.status === 'rejeitado' ? 'selected' : '' %>>Rejeitado</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Tipo</label>
+        <select name="tipo" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          <option value="quota" <%= filtros.tipo === 'quota' ? 'selected' : '' %>>Quota</option>
+          <option value="atividade" <%= filtros.tipo === 'atividade' ? 'selected' : '' %>>Atividade</option>
+          <option value="inscricao" <%= filtros.tipo === 'inscricao' ? 'selected' : '' %>>Inscrição</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Data início</label>
+        <input type="date" name="data_inicio" class="form-control form-control-sm"
+               value="<%= filtros.data_inicio || '' %>" />
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Data fim</label>
+        <input type="date" name="data_fim" class="form-control form-control-sm"
+               value="<%= filtros.data_fim || '' %>" />
+      </div>
+      <div class="col-md-1 d-flex gap-1">
+        <button type="submit" class="btn btn-primary btn-sm w-100">
+          <i class="bi bi-search"></i>
+        </button>
+        <a href="/financeiro/pagamentos" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-x"></i>
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Tabela de pagamentos -->
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <% if (pagamentos.length === 0) { %>
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-inbox fs-1"></i>
+        <p class="mt-2">Nenhum pagamento encontrado com os filtros aplicados.</p>
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="table table-hover siga-table mb-0">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Associado</th>
+              <th>Tipo</th>
+              <th>Valor</th>
+              <th>Método</th>
+              <th>Data Pagamento</th>
+              <th>Estado</th>
+              <th>Recibo</th>
+              <th class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% pagamentos.forEach(pag => { %>
+            <tr>
+              <td>
+                <code class="text-dark"><%= pag.codigo %></code>
+              </td>
+              <td>
+                <div class="fw-semibold">
+                  <%= pag.associado ? (pag.associado.tipo === 'pessoa_fisica'
+                    ? `${pag.associado.nome} ${pag.associado.apelido || ''}`
+                    : pag.associado.nome_entidade) : 'N/D' %>
+                </div>
+                <small class="text-muted"><%= pag.associado ? pag.associado.codigo : '' %></small>
+              </td>
+              <td><span class="badge bg-secondary"><%= pag.tipoLabel %></span></td>
+              <td class="fw-bold text-end"><%= parseFloat(pag.valor).toFixed(2) %> CVE</td>
+              <td>
+                <% const metodos = { transferencia: 'Transferência', numerario: 'Numerário', cheque: 'Cheque', mbway: 'MBWay', outro: 'Outro' }; %>
+                <small><%= metodos[pag.metodo_pagamento] || pag.metodo_pagamento %></small>
+              </td>
+              <td><small><%= new Date(pag.data_pagamento).toLocaleDateString('pt-PT') %></small></td>
+              <td>
+                <span class="badge bg-<%= pag.statusBadge %>"><%= pag.statusLabel %></span>
+              </td>
+              <td>
+                <% if (pag.recibo) { %>
+                  <a href="/financeiro/recibos/<%= pag.recibo.id %>" class="badge bg-success text-decoration-none">
+                    <i class="bi bi-receipt me-1"></i><%= pag.recibo.numero %>
+                  </a>
+                <% } else { %>
+                  <span class="text-muted small">—</span>
+                <% } %>
+              </td>
+              <td class="text-center">
+                <a href="/financeiro/pagamentos/<%= pag.id %>" class="btn btn-sm btn-outline-primary" title="Ver detalhe">
+                  <i class="bi bi-eye"></i>
+                </a>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginação -->
+      <% if (totalPaginas > 1) { %>
+      <div class="d-flex justify-content-between align-items-center p-3 border-top">
+        <small class="text-muted">Página <%= paginaAtual %> de <%= totalPaginas %></small>
+        <nav>
+          <ul class="pagination pagination-sm mb-0">
+            <% if (paginaAtual > 1) { %>
+              <li class="page-item">
+                <a class="page-link" href="?pagina=<%= paginaAtual - 1 %>&status=<%= filtros.status || '' %>&tipo=<%= filtros.tipo || '' %>">‹</a>
+              </li>
+            <% } %>
+            <% for (let p = Math.max(1, paginaAtual - 2); p <= Math.min(totalPaginas, paginaAtual + 2); p++) { %>
+              <li class="page-item <%= p === paginaAtual ? 'active' : '' %>">
+                <a class="page-link" href="?pagina=<%= p %>&status=<%= filtros.status || '' %>&tipo=<%= filtros.tipo || '' %>"><%= p %></a>
+              </li>
+            <% } %>
+            <% if (paginaAtual < totalPaginas) { %>
+              <li class="page-item">
+                <a class="page-link" href="?pagina=<%= paginaAtual + 1 %>&status=<%= filtros.status || '' %>&tipo=<%= filtros.tipo || '' %>">›</a>
+              </li>
+            <% } %>
+          </ul>
+        </nav>
+      </div>
+      <% } %>
+    <% } %>
+  </div>
+</div>
